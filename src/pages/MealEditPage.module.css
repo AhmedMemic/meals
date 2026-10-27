@@ -1,0 +1,55 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.twoCols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.checks {
+  display: flex;
+  flex-direction: column;
+}
+
+.ingredients {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ing {
+  display: grid;
+  grid-template-columns: 76px 104px minmax(0, 1fr) var(--tap);
+  gap: 6px;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.ingName {
+  grid-column: 1 / -1;
+}
+
+.ing .input,
+.ing .select {
+  min-height: 44px;
+  padding: 0 10px;
+}
+
+.hint {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.bar {
+  position: sticky;
+  bottom: calc(var(--nav-h) + var(--safe-bottom));
+  display: flex;
+  gap: var(--space-2);
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+  background: var(--bg);
+}

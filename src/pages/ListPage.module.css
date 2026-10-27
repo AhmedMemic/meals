@@ -1,0 +1,53 @@
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.empty {
+  padding: var(--space-5) 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+.staples {
+  margin: var(--space-2) 0;
+  padding: var(--space-1) var(--space-3) var(--space-2);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+
+.hint {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  margin-bottom: var(--space-1);
+}
+
+.stapleChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: var(--space-1) 0 var(--space-1);
+}
+
+.stapleQty {
+  margin-left: 6px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.small {
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  font-size: var(--fs-sm);
+}
+
+.doneHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.doneHead .section-title {
+  color: var(--muted);
+}

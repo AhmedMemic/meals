@@ -1,0 +1,40 @@
+/* Paprika i bosiljak: warm charcoal, paprika orange, basil green. */
+:root {
+  --bg: #1b1614;
+  --surface: #262020;
+  --surface-2: #2f2826;
+  --nav: #211b19;
+  --border: #3a322f;
+  --line: #2f2826;
+  --text: #f3ece7;
+  --muted: #b3a69f;
+  --faint: #8a7e78;
+  --accent: #ee6a3c;
+  --accent-hover: #f4895f;
+  --on-accent: #1b1614;
+  --accent-soft: #3a2219;
+  --ok: #7cc08a;
+  --danger: #ff8a7a;
+  --danger-soft: #3b1f1c;
+
+  --font: 'Manrope', system-ui, sans-serif;
+  --fs-xs: 12px;
+  --fs-sm: 14px;
+  --fs-md: 16px;
+  --fs-lg: 20px;
+  --fs-xl: 28px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --gutter: 16px;
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --tap: 44px;
+  --nav-h: 64px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}

@@ -1,0 +1,61 @@
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+  background: var(--surface);
+}
+
+.days {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.daysLabel {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  margin-right: 2px;
+}
+
+.group {
+  padding-top: var(--space-1);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.meal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 52px;
+  padding: 6px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  text-align: left;
+}
+
+.name {
+  font-weight: 600;
+}
+
+.meta {
+  flex: none;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.none {
+  padding: var(--space-4) 0;
+  color: var(--muted);
+}
