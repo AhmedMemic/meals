@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { TabBar } from './components/TabBar';
 import { ToastProvider } from './components/Toast';
@@ -7,8 +8,12 @@ import { MealEditPage } from './pages/MealEditPage';
 import { MealsPage } from './pages/MealsPage';
 import { MorePage } from './pages/MorePage';
 import { PlanPage } from './pages/PlanPage';
+import { syncWeeklyDeals } from './lib/weeklyDeals';
 
 export function App() {
+  // Thursday's sales (GitHub Action) are picked up whenever the app opens.
+  useEffect(() => void syncWeeklyDeals(), []);
+
   return (
     <HashRouter>
       <ToastProvider>

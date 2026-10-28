@@ -9,7 +9,7 @@ import { useToast } from '../components/Toast';
 import { addItem, replaceDeals } from '../db/actions';
 import { db } from '../db/db';
 import { SALE_STORES, storeName } from '../data/stores';
-import { AiError, getApiKey } from '../lib/aiKey';
+import { AiError, getApiKey, getCity } from '../lib/aiKey';
 import { shortDate, today } from '../lib/dates';
 import { activeDeals, groupDeals } from '../lib/prices';
 import { getItem, setItem } from '../lib/storage';
@@ -59,7 +59,7 @@ export function DealsPage() {
       stores.map(async (st) => {
         try {
           const { fetchDeals } = await import('../lib/ai');
-          const found = await fetchDeals(st, catalog!, today());
+          const found = await fetchDeals(st, catalog!, today(), getCity());
           await replaceDeals(st.id, found);
           setItem(`dealsChecked:${st.id}`, today());
           toast({ text: s.deals.checked(st.name, found.length) });
@@ -132,6 +132,8 @@ export function DealsPage() {
           : checkedDates.length
             ? checkedDates.map(([n, d]) => `${n} ${shortDate(d!)}`).join(' · ')
             : s.deals.neverChecked}
+        <br />
+        {s.deals.weekly(getCity())}
       </p>
 
       {!shown.length && <p className={css.empty}>{filter === 'all' ? s.deals.none : s.deals.noneStore}</p>}

@@ -5,7 +5,7 @@ import { Page } from '../components/Page';
 import { useToast } from '../components/Toast';
 import { moveCategory, restoreStarterMeals } from '../db/actions';
 import { db } from '../db/db';
-import { clearApiKey, getApiKey, setApiKey } from '../lib/aiKey';
+import { clearApiKey, getApiKey, getCity, setApiKey, setCity } from '../lib/aiKey';
 import { createBackup, lastBackup, markBackedUp, parseBackup, restoreBackup, shareBackup } from '../lib/backup';
 import { shortDate } from '../lib/dates';
 import { s } from '../strings';
@@ -17,6 +17,7 @@ export function MorePage() {
   const [last, setLast] = useState(lastBackup);
   const [hasKey, setHasKey] = useState(() => !!getApiKey());
   const [keyText, setKeyText] = useState('');
+  const [city, setCityText] = useState(getCity);
   const fileInput = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
@@ -114,6 +115,24 @@ export function MorePage() {
             </button>
           </form>
         )}
+        <label className={css.cityField}>
+          <span className={css.text}>
+            {s.ai.city}
+            <br />
+            {s.ai.cityHint}
+          </span>
+          <input
+            className="input"
+            value={city}
+            onChange={(e) => setCityText(e.target.value)}
+            onBlur={() => {
+              if (city.trim() === getCity()) return;
+              setCity(city);
+              setCityText(getCity());
+              toast({ text: s.ai.citySaved(getCity()) });
+            }}
+          />
+        </label>
       </section>
 
       <section className={css.section}>

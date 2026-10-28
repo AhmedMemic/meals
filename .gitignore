@@ -4,3 +4,6 @@ dev-dist
 *.local
 .DS_Store
 coverage
+
+# Written by the weekly sales check (scripts/fetch-deals.ts)
+public/deals.json

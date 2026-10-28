@@ -25,3 +25,14 @@ export class AiError extends Error {
     super(message);
   }
 }
+
+/** Sales are checked for this city (catalogs and prices differ by region). */
+export const DEFAULT_CITY = 'Sarajevo';
+
+export function getCity(): string {
+  return getItem('city') || DEFAULT_CITY;
+}
+
+export function setCity(city: string) {
+  setItem('city', city.trim() || DEFAULT_CITY);
+}

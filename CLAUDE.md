@@ -15,6 +15,9 @@ Live at https://ahmedmemic.github.io/meals/ (repo `AhmedMemic/meals`).
 ## Deploy
 `.github/workflows/deploy.yml`: on push to `main` runs `npm ci`, `npm test`,
 `npm run build` and deploys `dist/` to GitHub Pages (Pages source = "GitHub Actions").
+Every deploy re-publishes the live `deals.json`; on Thursdays 05:00 UTC (cron) and on a
+manual run with "check_sales" it first runs `npm run deals` (`scripts/fetch-deals.ts`,
+Claude, repo secret `ANTHROPIC_API_KEY`, `CITY`) to refresh it. `public/deals.json` is gitignored.
 
 ## Shared-origin rules (IMPORTANT)
 All GitHub Pages apps share the origin `https://ahmedmemic.github.io`
@@ -66,6 +69,16 @@ Dexie + dexie-react-hooks (`useLiveQuery`), self-hosted Manrope via @fontsource
   are only images go through a second call with the image URLs. Sales are replaced per store,
   matched to catalog keys (AI picks the key, `prices.ts` verifies it). "Slikaj račun" reads a
   receipt photo; the user checks lines before they become `prices`. Prices are backed up, sales are not.
+- **Location:** catalogs and prices differ by city/region (FBiH, RS). Claude only keeps offers
+  valid in the city (`meals:city`, default Sarajevo; the Action uses `CITY`). Bingo's FBiH
+  catalog is `kataloska-akcija-305`; Mercator lists its catalogs per city on `akcije/katalozi/?kcity=<n>`
+  (Sarajevo = 1, regional versions I/II/III). Both are Issuu flipbooks: `src/lib/issuu.ts` finds the
+  documents (`Store.issuu`, filtered by document name) and their public page images
+  (`image.isu.pub/<id>/jpg/page_<n>.jpg`); Claude reads each catalog in its own image call. This works
+  in the Action (Node); on the phone the store and Issuu pages block cross-site reads, so Claude builds
+  the URLs itself from the store hint.
+- **Weekly sales:** `src/lib/weeklyDeals.ts` loads `deals.json` on app start if it is new to the
+  phone; a store checked by hand on/after that day keeps its own sales.
 - Theme "Paprika i bosiljak": dark only, paprika orange accent, basil green ticks.
   Touch targets ≥ 44 px, phone first.
 

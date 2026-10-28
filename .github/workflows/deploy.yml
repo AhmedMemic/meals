@@ -3,7 +3,16 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Weekly sales check: Thursday 05:00 UTC = 06:00 in Sarajevo (07:00 in summer).
+  # GitHub may start scheduled runs a bit late.
+  schedule:
+    - cron: '0 5 * * 4'
   workflow_dispatch:
+    inputs:
+      check_sales:
+        description: 'Check store sales now (uses the Claude API key secret)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -25,6 +34,17 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      # Every deploy publishes the current sales: last week's file from the live site,
+      # refreshed by Claude on Thursdays (stores that fail keep last week's).
+      - name: Last published sales
+        run: curl -sfL https://ahmedmemic.github.io/meals/deals.json -o public/deals.json || echo "No deals.json yet"
+      - name: Check sales with Claude
+        if: github.event_name == 'schedule' || inputs.check_sales
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CITY: Sarajevo
+          TZ: Europe/Sarajevo
+        run: npm run deals
       - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

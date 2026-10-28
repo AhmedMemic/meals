@@ -44,3 +44,8 @@
   flex-direction: column;
   gap: var(--space-2);
 }
+
+.cityField {
+  display: block;
+  margin-top: var(--space-4);
+}

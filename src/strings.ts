@@ -191,6 +191,7 @@ export const s = {
     failed: (store: string) => `${store}: provjera nije uspjela`,
     lastChecked: (when: string) => `Zadnja provjera: ${when}`,
     neverChecked: 'Akcije još nisu provjerene.',
+    weekly: (city: string) => `Akcije za ${city} se same provjeravaju četvrtkom ujutro.`,
     all: 'Sve',
     forList: 'Za tvoju listu',
     usual: 'Što inače kupujemo',
@@ -204,7 +205,7 @@ export const s = {
     addToList: (n: string) => `Dodaj u listu: ${n}`,
     added: (n: string) => `Dodano u listu: ${n}`,
     receipt: 'Slikaj račun',
-    noKey: 'Za akcije i račune treba Claude API ključ. Upiši ga u „Više“.',
+    noKey: 'Za ručnu provjeru akcija i čitanje računa treba Claude API ključ. Upiši ga u „Više“.',
     goToSettings: 'Postavke',
   },
 
@@ -237,7 +238,7 @@ export const s = {
 
   ai: {
     title: 'Claude (AI)',
-    hint: 'Za provjeru akcija i čitanje računa. Ključ ostaje samo na ovom telefonu i ne ide u rezervnu kopiju. Plaća se po korištenju: oko 0,03–0,05 $ po računu i 0,20–0,50 $ po provjeri jedne prodavnice.',
+    hint: 'Za ručnu provjeru akcija i čitanje računa. Ključ ostaje samo na ovom telefonu i ne ide u rezervnu kopiju. Plaća se po korištenju: oko 0,03–0,05 $ po računu i 0,20–0,50 $ po provjeri jedne prodavnice.',
     keyLabel: 'API ključ',
     keyPlaceholder: 'sk-ant-…',
     keySet: 'Ključ je sačuvan.',
@@ -246,6 +247,9 @@ export const s = {
     saved: 'Ključ je sačuvan',
     removed: 'Ključ je uklonjen',
     getKey: 'Ključ se pravi na platform.claude.com → API Keys.',
+    city: 'Grad za akcije',
+    cityHint: 'Katalozi i cijene se razlikuju po gradu i regiji (FBiH, RS).',
+    citySaved: (c: string) => `Akcije se provjeravaju za: ${c}`,
     errors: {
       noKey: 'Prvo upiši Claude API ključ u „Više“.',
       badKey: 'API ključ nije ispravan.',

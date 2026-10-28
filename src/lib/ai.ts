@@ -1,12 +1,18 @@
-// Claude calls, made straight from the phone with the user's own API key.
-// Loaded on demand (the SDK is large); key and errors live in aiKey.ts.
+// Claude calls: from the phone with the user's own API key, and from the weekly
+// GitHub Action (scripts/fetch-deals.ts) with a key from the repo secrets.
+// Loaded on demand in the app (the SDK is large); key and errors live in aiKey.ts.
 import Anthropic from '@anthropic-ai/sdk';
 import { STORES, type CatalogItem, type Deal } from '../types';
 import type { Store } from '../data/stores';
 import { cleanDeals, cleanReceipt, type RawDeal, type RawReceipt, type Receipt } from './prices';
 import { AiError, getApiKey } from './aiKey';
+import { fetchIssuuCatalogs } from './issuu';
+
+/** Most flyer images Claude may hand back from browsing. */
+const MAX_FLYER_IMAGES = 24;
 
 const MODEL = 'claude-opus-5-5';
+
 function client(): Anthropic {
   const apiKey = getApiKey();
   if (!apiKey) throw new AiError('noKey');
@@ -32,10 +38,10 @@ type Tool = Anthropic.Beta.BetaToolUnion;
  * Returns the text of the final answer.
  */
 async function run(
+  c: Anthropic,
   content: Anthropic.Beta.BetaContentBlockParam[],
   opts: { tools?: Tool[]; schema?: Record<string, unknown> } = {},
 ): Promise<string> {
-  const c = client();
   const messages: Anthropic.Beta.BetaMessageParam[] = [{ role: 'user', content }];
   try {
     for (let turn = 0; turn < 6; turn++) {
@@ -155,11 +161,61 @@ interface BrowseResult {
   images?: unknown[];
 }
 
-/** Reads a store's current sales. */
-export async function fetchDeals(store: Store, catalog: CatalogItem[], today: string): Promise<Deal[]> {
+/** Reads the offers on flyer or catalog page images; [] if the images cannot be read. */
+async function readImages(
+  c: Anthropic,
+  images: string[],
+  what: string,
+  catalog: CatalogItem[],
+  today: string,
+  city: string,
+): Promise<RawDeal[]> {
+  if (!images.length) return [];
+  try {
+    const text = await run(
+      c,
+      [
+        ...images.map((url): Anthropic.Beta.BetaImageBlockParam => ({ type: 'image', source: { type: 'url', url } })),
+        {
+          type: 'text',
+          text: `These are ${what} for ${city} (Bosnia and Herzegovina). Today is ${today}. List the offers on them.
+An offer's own dates (e.g. "Akcija vrijedi 20.10-28.10.2026.") count over the dates of the whole flyer. Skip offers that already ended.
+
+${DEAL_RULES}
+
+Known items:
+${catalogText(catalog)}`,
+        },
+      ],
+      { schema: DEALS_SCHEMA },
+    );
+    return parseJson<{ deals?: RawDeal[] }>(text).deals ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** Reads a store's current sales that are valid in the family's city. */
+export async function fetchDeals(
+  store: Store,
+  catalog: CatalogItem[],
+  today: string,
+  city: string,
+  c: Anthropic = client(),
+): Promise<Deal[]> {
+  // Issuu catalogs are read directly where possible (the weekly Action);
+  // in the browser that is blocked and Claude finds the pages itself (see the store hint).
+  const issuu = store.issuu ? await fetchIssuuCatalogs(store.issuu, city).catch(() => []) : [];
+  const issuuImages = new Set(issuu.flatMap((d) => d.images));
+
   const pages = store.salePages.length ? store.salePages.join('\n') : '(none, search the web)';
-  const prompt = `You check current grocery sales (akcije, vikend akcija, katalog) for a family in Bosnia and Herzegovina.
+  const imageNote = issuu.length
+    ? `These catalogs are already being read separately; do not list their pages: ${issuu.map((d) => d.doc).join(', ')}. Only list images of other current flyers.`
+    : '';
+  const prompt = `You check current grocery sales (akcije, vikend akcija, katalog) for a family in ${city}, Bosnia and Herzegovina.
 Today is ${today}. Store: ${store.name} (Bosnia and Herzegovina).
+Location matters: stores publish different catalogs and prices per city or region (FBiH, RS, Brčko).
+Only include offers valid in ${city}: offers for its region or the whole country count, offers limited to other cities or regions do not.
 Start with these pages:
 ${pages}
 ${store.hint ?? ''}
@@ -168,7 +224,7 @@ Collect every product that is on sale now or later this week. Ignore offers that
 
 ${DEAL_RULES}
 
-If some current offers are published only as images (flyer or catalog pages), also list up to 8 direct image URLs (.jpg, .png, .webp) of those current pages in "images".
+If some current offers are published only as images (flyer or catalog pages), also list up to ${MAX_FLYER_IMAGES} direct image URLs (.jpg, .png, .webp) of those current pages in "images". ${imageNote}
 
 Answer with only this JSON, nothing else:
 {"deals": [{"name": "", "price": 0, "oldPrice": null, "unit": "", "validFrom": null, "validTo": null, "key": null}], "images": []}
@@ -176,38 +232,40 @@ Answer with only this JSON, nothing else:
 Known items:
 ${catalogText(catalog)}`;
 
-  const text = await run([{ type: 'text', text: prompt }], {
-    tools: [
-      { type: 'web_fetch_20260209', name: 'web_fetch', max_uses: 8 },
-      { type: 'web_search_20260209', name: 'web_search', max_uses: 3 },
-    ],
-  });
-  const browsed = parseJson<BrowseResult>(text);
-  const raw = [...(browsed.deals ?? [])];
+  const browse = async (): Promise<RawDeal[]> => {
+    const text = await run(c, [{ type: 'text', text: prompt }], {
+      tools: [
+        { type: 'web_fetch_20260209', name: 'web_fetch', max_uses: 8 },
+        { type: 'web_search_20260209', name: 'web_search', max_uses: 3 },
+      ],
+    });
+    const browsed = parseJson<BrowseResult>(text);
+    const images = (browsed.images ?? [])
+      .filter((u): u is string => typeof u === 'string' && /^https:\/\/\S+$/.test(u))
+      .filter((u) => !issuuImages.has(u))
+      .slice(0, MAX_FLYER_IMAGES);
+    const what = `current sale flyer pages from ${store.name}`;
+    return [...(browsed.deals ?? []), ...(await readImages(c, images, what, catalog, today, city))];
+  };
 
-  const images = (browsed.images ?? [])
-    .filter((u): u is string => typeof u === 'string' && /^https:\/\/\S+$/.test(u))
-    .slice(0, 8);
-  if (images.length) {
-    try {
-      const fromImages = await run(
-        [
-          ...images.map((url): Anthropic.Beta.BetaImageBlockParam => ({ type: 'image', source: { type: 'url', url } })),
-          {
-            type: 'text',
-            text: `These are current sale flyer pages from ${store.name} (Bosnia and Herzegovina). Today is ${today}. List the offers on them.\n\n${DEAL_RULES}\n\nKnown items:\n${catalogText(catalog)}`,
-          },
-        ],
-        { schema: DEALS_SCHEMA },
-      );
-      raw.push(...(parseJson<{ deals?: RawDeal[] }>(fromImages).deals ?? []));
-    } catch {
-      // Images could not be read: keep what the pages gave.
-    }
-  }
+  let browseFailed: { error: unknown } | null = null;
+  // One call per catalog, all at the same time as browsing.
+  const [fromCatalogs, fromPages] = await Promise.all([
+    Promise.all(
+      issuu.map((d) =>
+        readImages(c, d.images, `the pages of the ${store.name} catalog "${d.doc}"`, catalog, today, city),
+      ),
+    ).then((r) => r.flat()),
+    browse().catch((error: unknown) => {
+      browseFailed = { error };
+      return [] as RawDeal[];
+    }),
+  ]);
+  // The catalogs alone are enough when browsing fails.
+  if (browseFailed && !fromCatalogs.length) throw (browseFailed as { error: unknown }).error;
 
   const byKey = new Map(catalog.map((c) => [c.key, c]));
-  return cleanDeals(raw, store.id, byKey, Date.now());
+  return cleanDeals([...fromCatalogs, ...fromPages], store.id, byKey, Date.now());
 }
 
 /** Reads items and prices from a photo of a receipt. */
@@ -226,6 +284,7 @@ Read:
 Known items:
 ${catalogText(catalog)}`;
   const text = await run(
+    client(),
     [
       { type: 'image', source: { type: 'base64', media_type: mediaType, data } },
       { type: 'text', text: prompt },
