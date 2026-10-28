@@ -125,3 +125,41 @@ export interface CatalogItem {
   useCount: number;
   lastUsed: number;
 }
+
+export const STORES = ['bingo', 'mercator', 'konzum', 'penny', 'pijaca', 'ostalo'] as const;
+export type StoreId = (typeof STORES)[number];
+
+/** A price we paid or saw: from a receipt photo or typed by hand. */
+export interface PriceRecord {
+  id?: number;
+  /** Catalog key of the item (normalised name). */
+  key: string;
+  /** Name as it was on the receipt. */
+  name: string;
+  store: StoreId;
+  /** KM per `unit`. */
+  price: number;
+  /** What the price is for, e.g. "kg", "1 l", "kom", "500 g". */
+  unit: string;
+  /** Local date, YYYY-MM-DD. */
+  date: string;
+  source: 'racun' | 'rucno';
+}
+
+/** A sale offer read from a store's website or catalog. */
+export interface Deal {
+  id?: number;
+  store: StoreId;
+  name: string;
+  /** Sale price in KM. */
+  price: number;
+  oldPrice: number | null;
+  /** What the price is for, e.g. "kg", "1 l", "kom". */
+  unit: string;
+  validFrom: string | null;
+  validTo: string | null;
+  /** Matching catalog key, if the item is one we know. */
+  key: string | null;
+  category: CategoryId | null;
+  fetchedAt: number;
+}

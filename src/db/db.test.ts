@@ -8,10 +8,13 @@ import {
   copyWeek,
   deleteMeal,
   removePlanEntry,
+  replaceDeals,
   restoreStarterMeals,
+  savePrices,
   weekEntries,
 } from './actions';
 import { DB_NAME, MealsDb } from './db';
+import type { Deal } from '../types';
 
 let d: MealsDb;
 let n = 0;
@@ -89,4 +92,28 @@ describe('db', () => {
     await other.delete();
     expect(() => parseBackup('{"app":"corner","data":{}}')).toThrow();
   });
+
+  it('backs up prices but not sales, and reads backups made before prices', async () => {
+    await savePrices([{ key: 'mlijeko', name: 'Mlijeko 1 l', store: 'bingo', price: 1.85, unit: '1 l', date: '2026-10-28', source: 'racun' }], d);
+    await replaceDeals('bingo', [deal('Jaja 10 kom', 'jaja')], d);
+    const backup = await createBackup(d);
+    expect(backup.data.prices).toHaveLength(1);
+    expect(JSON.stringify(backup)).not.toContain('Jaja 10 kom');
+
+    const old = JSON.parse(JSON.stringify(backup));
+    delete old.data.prices;
+    await restoreBackup(parseBackup(JSON.stringify(old)), d);
+    expect(await d.prices.count()).toBe(0);
+  });
+
+  it('replaces only the checked store\'s sales', async () => {
+    await replaceDeals('bingo', [deal('Jaja 10 kom', 'jaja'), deal('Mlijeko', 'mlijeko')], d);
+    await replaceDeals('mercator', [deal('Hljeb', 'hljeb')], d);
+    await replaceDeals('bingo', [deal('Riža', null)], d);
+    expect((await d.deals.toArray()).map((x) => x.name).sort()).toEqual(['Hljeb', 'Riža']);
+  });
 });
+
+function deal(name: string, key: string | null): Deal {
+  return { store: 'bingo', name, price: 2, oldPrice: null, unit: 'kom', validFrom: null, validTo: null, key, category: null, fetchedAt: 0 };
+}

@@ -6,6 +6,7 @@ import css from './TabBar.module.css';
 const TABS: { to: string; label: string; icon: IconName }[] = [
   { to: '/plan', label: s.tabs.plan, icon: 'plan' },
   { to: '/lista', label: s.tabs.list, icon: 'list' },
+  { to: '/akcije', label: s.tabs.deals, icon: 'tag' },
   { to: '/jela', label: s.tabs.meals, icon: 'meals' },
   { to: '/vise', label: s.tabs.more, icon: 'more' },
 ];

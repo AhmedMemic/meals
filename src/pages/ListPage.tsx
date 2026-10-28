@@ -20,6 +20,10 @@ import {
 } from '../db/actions';
 import { db } from '../db/db';
 import { groupByCategory, listToText } from '../lib/list';
+import { getApiKey } from '../lib/aiKey';
+import { today } from '../lib/dates';
+import { activeDeals, dealsByKey } from '../lib/prices';
+import { useReceiptScan } from '../components/prices/ReceiptScan';
 import { formatQtyList } from '../lib/units';
 import { s } from '../strings';
 import type { ListItem } from '../types';
@@ -29,6 +33,8 @@ export function ListPage() {
   const items = useLiveQuery(() => db.list.toArray(), []);
   const categories = useLiveQuery(() => db.categories.orderBy('order').toArray(), []);
   const catalog = useLiveQuery(() => db.catalog.toArray(), []);
+  const deals = useLiveQuery(() => db.deals.toArray(), []);
+  const receipt = useReceiptScan();
   const [editing, setEditing] = useState<ListItem | null>(null);
   const [menu, setMenu] = useState(false);
   const toast = useToast();
@@ -41,10 +47,12 @@ export function ListPage() {
   );
   const onList = useMemo(() => new Set([...open, ...staples].map((i) => i.key)), [open, staples]);
   const groups = useMemo(() => groupByCategory(open, categories ?? []), [open, categories]);
+  const sales = useMemo(() => dealsByKey(activeDeals(deals ?? [], today())), [deals]);
 
   if (!items || !categories || !catalog) return null;
 
-  async function have(item: ListItem) {
+  /** "Imam kod kuće" or ✕: removes the item, with undo. */
+  async function remove(item: ListItem) {
     await removeListItem(item.id!);
     setEditing(null);
     toast({ text: s.list.removed(item.name), action: { label: s.common.undo, run: () => restoreListItem(item) } });
@@ -118,7 +126,14 @@ export function ListPage() {
           <h2 className="section-title">{g.category.name}</h2>
           <ul className={css.list}>
             {g.items.map((i) => (
-              <ListRow key={i.id} item={i} onToggle={() => setChecked(i.id!, true)} onOpen={() => setEditing(i)} />
+              <ListRow
+                key={i.id}
+                item={i}
+                deal={sales.get(i.key)}
+                onToggle={() => setChecked(i.id!, true)}
+                onOpen={() => setEditing(i)}
+                onDelete={() => remove(i)}
+              />
             ))}
           </ul>
         </section>
@@ -134,7 +149,13 @@ export function ListPage() {
           </div>
           <ul className={css.list}>
             {done.map((i) => (
-              <ListRow key={i.id} item={i} onToggle={() => setChecked(i.id!, false)} onOpen={() => setEditing(i)} />
+              <ListRow
+                key={i.id}
+                item={i}
+                onToggle={() => setChecked(i.id!, false)}
+                onOpen={() => setEditing(i)}
+                onDelete={() => remove(i)}
+              />
             ))}
           </ul>
         </section>
@@ -145,7 +166,7 @@ export function ListPage() {
           item={editing}
           categories={categories}
           onClose={() => setEditing(null)}
-          onHave={() => have(editing)}
+          onHave={() => remove(editing)}
           onSave={async (changes) => {
             await updateListItem(editing.id!, changes);
             setEditing(null);
@@ -156,6 +177,17 @@ export function ListPage() {
       {menu && (
         <Sheet title={s.list.title} onClose={() => setMenu(false)}>
           <div className={formCss.menu}>
+            <button
+              type="button"
+              className="btn"
+              disabled={!getApiKey()}
+              onClick={() => {
+                setMenu(false);
+                receipt.scan();
+              }}
+            >
+              {s.deals.receipt}
+            </button>
             <button
               type="button"
               className="btn"
@@ -181,6 +213,8 @@ export function ListPage() {
           </div>
         </Sheet>
       )}
+
+      {receipt.element}
     </Page>
   );
 }

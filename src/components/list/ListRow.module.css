@@ -84,3 +84,29 @@
   font-weight: 400;
   text-decoration: line-through;
 }
+
+.sale {
+  display: block;
+  width: fit-content;
+  margin-top: 3px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+}
+
+.delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  height: var(--tap);
+  margin-right: -10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--faint);
+  flex: none;
+}

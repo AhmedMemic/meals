@@ -1,5 +1,5 @@
 import Dexie, { type Table, type Transaction } from 'dexie';
-import type { CatalogItem, Category, ListItem, Meal, PlanEntry, SavedWeek } from '../types';
+import type { CatalogItem, Category, Deal, ListItem, Meal, PlanEntry, PriceRecord, SavedWeek } from '../types';
 import { STARTER_CATEGORIES } from '../data/categories';
 import { STARTER_CATALOG } from '../data/catalog';
 import { STARTER_MEALS } from '../data/meals';
@@ -15,6 +15,8 @@ export class MealsDb extends Dexie {
   list!: Table<ListItem, number>;
   catalog!: Table<CatalogItem, string>;
   categories!: Table<Category, string>;
+  prices!: Table<PriceRecord, number>;
+  deals!: Table<Deal, number>;
 
   constructor(name = DB_NAME) {
     super(name);
@@ -26,6 +28,10 @@ export class MealsDb extends Dexie {
       list: '++id, key',
       catalog: 'key, useCount',
       categories: 'id, order',
+    });
+    this.version(2).stores({
+      prices: '++id, key, store, date',
+      deals: '++id, store, key',
     });
     this.on('populate', (tx) => seed(tx));
   }

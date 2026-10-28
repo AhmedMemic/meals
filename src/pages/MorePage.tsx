@@ -5,6 +5,7 @@ import { Page } from '../components/Page';
 import { useToast } from '../components/Toast';
 import { moveCategory, restoreStarterMeals } from '../db/actions';
 import { db } from '../db/db';
+import { clearApiKey, getApiKey, setApiKey } from '../lib/aiKey';
 import { createBackup, lastBackup, markBackedUp, parseBackup, restoreBackup, shareBackup } from '../lib/backup';
 import { shortDate } from '../lib/dates';
 import { s } from '../strings';
@@ -14,6 +15,8 @@ export function MorePage() {
   const categories = useLiveQuery(() => db.categories.orderBy('order').toArray(), []);
   const weeks = useLiveQuery(() => db.weeks.toArray(), []);
   const [last, setLast] = useState(lastBackup);
+  const [hasKey, setHasKey] = useState(() => !!getApiKey());
+  const [keyText, setKeyText] = useState('');
   const fileInput = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
@@ -64,6 +67,53 @@ export function MorePage() {
             }}
           />
         </div>
+      </section>
+
+      <section className={css.section}>
+        <h2 className="section-title">{s.ai.title}</h2>
+        <p className={css.text}>
+          {s.ai.hint}
+          <br />
+          {hasKey ? s.ai.keySet : s.ai.getKey}
+        </p>
+        {hasKey ? (
+          <button
+            type="button"
+            className="btn"
+            onClick={() => {
+              clearApiKey();
+              setHasKey(false);
+              toast({ text: s.ai.removed });
+            }}
+          >
+            {s.ai.remove}
+          </button>
+        ) : (
+          <form
+            className={css.keyForm}
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!keyText.trim()) return;
+              setApiKey(keyText);
+              setKeyText('');
+              setHasKey(true);
+              toast({ text: s.ai.saved });
+            }}
+          >
+            <input
+              className="input"
+              type="password"
+              autoComplete="off"
+              aria-label={s.ai.keyLabel}
+              placeholder={s.ai.keyPlaceholder}
+              value={keyText}
+              onChange={(e) => setKeyText(e.target.value)}
+            />
+            <button type="submit" className="btn btn-primary" disabled={!keyText.trim()}>
+              {s.ai.save}
+            </button>
+          </form>
+        )}
       </section>
 
       <section className={css.section}>

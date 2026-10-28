@@ -16,3 +16,11 @@ export function setItem(key: string, value: string) {
     // Storage blocked: the app still works, only the reminder is lost.
   }
 }
+
+export function removeItem(key: string) {
+  try {
+    localStorage.removeItem(PREFIX + key);
+  } catch {
+    // Storage blocked: nothing to remove.
+  }
+}

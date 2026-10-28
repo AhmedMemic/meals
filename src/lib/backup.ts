@@ -1,5 +1,5 @@
 import { db, type MealsDb } from '../db/db';
-import type { CatalogItem, Category, ListItem, Meal, PlanEntry, SavedWeek } from '../types';
+import type { CatalogItem, Category, ListItem, Meal, PlanEntry, PriceRecord, SavedWeek } from '../types';
 import { daysBetween, today } from './dates';
 import { getItem, setItem } from './storage';
 
@@ -14,25 +14,28 @@ export interface Backup {
     list: ListItem[];
     catalog: CatalogItem[];
     categories: Category[];
+    /** Missing in backups made before prices existed. Sales and the API key are never backed up. */
+    prices?: PriceRecord[];
   };
 }
 
 const TABLES = ['meals', 'plan', 'weeks', 'list', 'catalog', 'categories'] as const;
 
 export async function createBackup(d: MealsDb = db): Promise<Backup> {
-  const [meals, plan, weeks, list, catalog, categories] = await Promise.all([
+  const [meals, plan, weeks, list, catalog, categories, prices] = await Promise.all([
     d.meals.toArray(),
     d.plan.toArray(),
     d.weeks.toArray(),
     d.list.toArray(),
     d.catalog.toArray(),
     d.categories.toArray(),
+    d.prices.toArray(),
   ]);
   return {
     app: 'meals',
     version: 1,
     exportedAt: new Date().toString(),
-    data: { meals, plan, weeks, list, catalog, categories },
+    data: { meals, plan, weeks, list, catalog, categories, prices },
   };
 }
 
@@ -46,14 +49,15 @@ export function parseBackup(text: string): Backup {
 
 /** Replaces all data with the backup. */
 export async function restoreBackup(b: Backup, d: MealsDb = db) {
-  await d.transaction('rw', [d.meals, d.plan, d.weeks, d.list, d.catalog, d.categories], async () => {
-    await Promise.all(TABLES.map((t) => d.table(t).clear()));
+  await d.transaction('rw', [d.meals, d.plan, d.weeks, d.list, d.catalog, d.categories, d.prices], async () => {
+    await Promise.all([...TABLES, 'prices'].map((t) => d.table(t).clear()));
     await d.meals.bulkAdd(b.data.meals);
     await d.plan.bulkAdd(b.data.plan);
     await d.weeks.bulkAdd(b.data.weeks);
     await d.list.bulkAdd(b.data.list);
     await d.catalog.bulkAdd(b.data.catalog);
     await d.categories.bulkAdd(b.data.categories);
+    await d.prices.bulkAdd(b.data.prices ?? []);
   });
 }
 

@@ -1,4 +1,6 @@
-import type { ListItem } from '../../types';
+import type { Deal, ListItem } from '../../types';
+import { storeName } from '../../data/stores';
+import { formatKm } from '../../lib/prices';
 import { formatQtyList } from '../../lib/units';
 import { s } from '../../strings';
 import { Icon } from '../Icon';
@@ -6,11 +8,14 @@ import css from './ListRow.module.css';
 
 interface Props {
   item: ListItem;
+  /** Current sale for this item, if any. */
+  deal?: Deal;
   onToggle: () => void;
   onOpen: () => void;
+  onDelete: () => void;
 }
 
-export function ListRow({ item, onToggle, onOpen }: Props) {
+export function ListRow({ item, deal, onToggle, onOpen, onDelete }: Props) {
   return (
     <li className={`${css.row} ${item.checked ? css.done : ''}`}>
       <button
@@ -29,8 +34,16 @@ export function ListRow({ item, onToggle, onOpen }: Props) {
               {item.sources.join(' · ')}
             </span>
           )}
+          {!item.checked && deal && (
+            <span className={css.sale}>
+              {s.prices.onSale} · {storeName(deal.store)} {formatKm(deal.price)}
+            </span>
+          )}
         </span>
         <span className={css.qty}>{formatQtyList(item.qty)}</span>
+      </button>
+      <button type="button" className={css.delete} aria-label={s.list.remove(item.name)} onClick={onDelete}>
+        <Icon name="x" size={18} />
       </button>
     </li>
   );

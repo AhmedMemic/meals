@@ -1,0 +1,168 @@
+/* Sale rows */
+.deal {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 60px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.dealText {
+  flex: 1;
+  min-width: 0;
+}
+
+.dealName {
+  display: block;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.dealMeta {
+  display: block;
+  margin-top: 1px;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.dealPrice {
+  flex: none;
+  max-width: 40%;
+  text-align: right;
+}
+
+.price {
+  display: block;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.unit {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.old {
+  display: block;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.pct {
+  font-weight: 800;
+  color: var(--ok);
+}
+
+/* Receipt check */
+.loading {
+  padding: var(--space-5) 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+.twoCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.line {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.off .lineBody {
+  opacity: 0.45;
+}
+
+.lineCheck {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 13px 0 0;
+  accent-color: var(--accent);
+}
+
+.lineBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lineMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: var(--fs-sm);
+}
+
+.linePrice {
+  width: 96px;
+}
+
+.known {
+  font-size: var(--fs-xs);
+  color: var(--ok);
+}
+
+/* Prices in the item sheet */
+.prices {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-sm);
+}
+
+.priceStore {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.cheapest {
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  color: var(--ok);
+}
+
+.sale {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+.addPrice {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px auto;
+  gap: 6px;
+}
+
+.addPrice .input,
+.addPrice .select {
+  padding: 0 8px;
+}

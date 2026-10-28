@@ -1,4 +1,4 @@
-import type { CategoryId, ListItem, Meal, PlanEntry, Qty, Slot } from '../types';
+import type { CategoryId, Deal, ListItem, Meal, PlanEntry, PriceRecord, Qty, Slot, StoreId } from '../types';
 import { STARTER_MEALS } from '../data/meals';
 import { weekDays } from '../lib/dates';
 import { mergeDrafts, planToDrafts } from '../lib/list';
@@ -191,4 +191,23 @@ export async function moveCategory(id: CategoryId, dir: -1 | 1, d: MealsDb = db)
     [cats[i], cats[j]] = [cats[j]!, cats[i]!];
     await d.categories.bulkPut(cats.map((c, order) => ({ ...c, order })));
   });
+}
+
+// ---- Prices and sales ----
+
+/** Replaces a store's saved sales with freshly read ones. */
+export async function replaceDeals(store: StoreId, deals: Deal[], d: MealsDb = db) {
+  await d.transaction('rw', d.deals, async () => {
+    await d.deals.where('store').equals(store).delete();
+    await d.deals.bulkAdd(deals.map((x) => ({ ...x, store })));
+  });
+}
+
+/** Saves checked receipt lines (or a typed price). */
+export async function savePrices(records: PriceRecord[], d: MealsDb = db) {
+  await d.prices.bulkAdd(records.filter((r) => r.key && r.price > 0));
+}
+
+export async function deletePrice(id: number, d: MealsDb = db) {
+  await d.prices.delete(id);
 }
