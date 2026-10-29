@@ -2,7 +2,7 @@ import { STORES, type CatalogItem, type CategoryId, type Deal, type PriceRecord,
 import { normalizeKey } from './units';
 
 /** Discounts from this percentage up count as "really off price". */
-export const BIG_DISCOUNT = 30;
+export const BIG_DISCOUNT = 25;
 
 export function formatKm(n: number): string {
   return `${n.toFixed(2).replace('.', ',')} KM`;

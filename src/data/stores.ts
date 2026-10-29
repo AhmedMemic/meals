@@ -8,8 +8,8 @@ export interface Store {
   salePages: string[];
   /** Extra hint for Claude about where the sales are. */
   hint?: string;
-  /** Where the store's Issuu catalogs are; their pages are read as images. */
-  issuu?: IssuuSource;
+  /** Pages with the store's Issuu catalogs; their pages are read as images. */
+  issuu?: IssuuSource[];
 }
 
 export const STORE_LIST: Store[] = [
@@ -19,6 +19,7 @@ export const STORE_LIST: Store[] = [
     salePages: [
       'https://www.bingotuzla.ba/super-ponuda/',
       'https://www.bingotuzla.ba/kataloska-akcija-305/',
+      'https://www.bingotuzla.ba/vikend-akcija-500/',
       'https://www.bingotuzla.ba/katalozi-u-bingu/',
     ],
     hint:
@@ -27,9 +28,13 @@ export const STORE_LIST: Store[] = [
       'kataloska-akcija-305 is "Kataloška ponuda FBiH" (Sarajevo and most of the Federation), 306 is RS (incl. Istočno Sarajevo). ' +
       'The catalog is an Issuu flipbook (iframe e.issuu.com/embed.html?d=<doc>&u=<user>); the document page ' +
       'issuu.com/<user>/docs/<doc> contains image.isu.pub/<id>/jpg/page_1_… and "pageCount"; every page is ' +
-      'https://image.isu.pub/<id>/jpg/page_<n>.jpg (n = 1…pageCount). Each offer has its own "Akcija vrijedi" dates.',
+      'https://image.isu.pub/<id>/jpg/page_<n>.jpg (n = 1…pageCount). Each offer has its own "Akcija vrijedi" dates. ' +
+      'The weekend catalog "TOP ponuda za kraj sedmice" (Thursday to Sunday, FBiH) is on vikend-akcija-500, also an Issuu flipbook.',
     // FBiH (Sarajevo); 306 would be RS.
-    issuu: { page: 'https://www.bingotuzla.ba/kataloska-akcija-305/' },
+    issuu: [
+      { page: 'https://www.bingotuzla.ba/kataloska-akcija-305/' },
+      { page: 'https://www.bingotuzla.ba/vikend-akcija-500/' },
+    ],
   },
   {
     id: 'mercator',
@@ -42,11 +47,13 @@ export const STORE_LIST: Store[] = [
       'Each catalog links an Issuu flipbook (issuu.com/mercator_bih/docs/<doc>); that page contains ' +
       'image.isu.pub/<id>/jpg/page_1_… and "pageCount"; every page is https://image.isu.pub/<id>/jpg/page_<n>.jpg. ' +
       'Food catalogs: "Kataloška ponuda" (redovni_katalog), "Pika pogodnosti", "Zaključane cijene".',
-    issuu: {
-      page: 'https://www.mercator.ba/akcije/katalozi/',
-      cityPicker: true,
-      docs: /redovni_katalog|pika_katalog|zaklju_ane_cijene/,
-    },
+    issuu: [
+      {
+        page: 'https://www.mercator.ba/akcije/katalozi/',
+        cityPicker: true,
+        docs: /redovni_katalog|pika_katalog|zaklju_ane_cijene/,
+      },
+    ],
   },
   {
     id: 'konzum',

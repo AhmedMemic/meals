@@ -15,7 +15,7 @@ Live at https://ahmedmemic.github.io/meals/ (repo `AhmedMemic/meals`).
 ## Deploy
 `.github/workflows/deploy.yml`: on push to `main` runs `npm ci`, `npm test`,
 `npm run build` and deploys `dist/` to GitHub Pages (Pages source = "GitHub Actions").
-Every deploy re-publishes the live `deals.json`; on Thursdays 05:00 UTC (cron) and on a
+Every deploy re-publishes the live `deals.json`; on Thursdays 11:00 UTC (cron, noon in Sarajevo) and on a
 manual run with "check_sales" it first runs `npm run deals` (`scripts/fetch-deals.ts`,
 Claude, repo secret `ANTHROPIC_API_KEY`, `CITY`) to refresh it. `public/deals.json` is gitignored.
 
@@ -71,7 +71,7 @@ Dexie + dexie-react-hooks (`useLiveQuery`), self-hosted Manrope via @fontsource
   receipt photo; the user checks lines before they become `prices`. Prices are backed up, sales are not.
 - **Location:** catalogs and prices differ by city/region (FBiH, RS). Claude only keeps offers
   valid in the city (`meals:city`, default Sarajevo; the Action uses `CITY`). Bingo's FBiH
-  catalog is `kataloska-akcija-305`; Mercator lists its catalogs per city on `akcije/katalozi/?kcity=<n>`
+  catalog is `kataloska-akcija-305`, its Thursday–Sunday weekend catalog `vikend-akcija-500`; Mercator lists its catalogs per city on `akcije/katalozi/?kcity=<n>`
   (Sarajevo = 1, regional versions I/II/III). Both are Issuu flipbooks: `src/lib/issuu.ts` finds the
   documents (`Store.issuu`, filtered by document name) and their public page images
   (`image.isu.pub/<id>/jpg/page_<n>.jpg`); Claude reads each catalog in its own image call. This works

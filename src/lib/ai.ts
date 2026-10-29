@@ -205,7 +205,9 @@ export async function fetchDeals(
 ): Promise<Deal[]> {
   // Issuu catalogs are read directly where possible (the weekly Action);
   // in the browser that is blocked and Claude finds the pages itself (see the store hint).
-  const issuu = store.issuu ? await fetchIssuuCatalogs(store.issuu, city).catch(() => []) : [];
+  const issuu = (
+    await Promise.all((store.issuu ?? []).map((s) => fetchIssuuCatalogs(s, city).catch(() => [])))
+  ).flat();
   const issuuImages = new Set(issuu.flatMap((d) => d.images));
 
   const pages = store.salePages.length ? store.salePages.join('\n') : '(none, search the web)';

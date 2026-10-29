@@ -3,10 +3,11 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  # Weekly sales check: Thursday 05:00 UTC = 06:00 in Sarajevo (07:00 in summer).
+  # Weekly sales check: Thursday 11:00 UTC = 12:00 in Sarajevo (13:00 in summer), after
+  # Bingo uploads its Thursday-to-Sunday weekend catalog in the morning.
   # GitHub may start scheduled runs a bit late.
   schedule:
-    - cron: '0 5 * * 4'
+    - cron: '0 11 * * 4'
   workflow_dispatch:
     inputs:
       check_sales:

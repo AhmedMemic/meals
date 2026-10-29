@@ -191,7 +191,7 @@ export const s = {
     failed: (store: string) => `${store}: provjera nije uspjela`,
     lastChecked: (when: string) => `Zadnja provjera: ${when}`,
     neverChecked: 'Akcije još nisu provjerene.',
-    weekly: (city: string) => `Akcije za ${city} se same provjeravaju četvrtkom ujutro.`,
+    weekly: (city: string) => `Akcije za ${city} se same provjeravaju četvrtkom u podne.`,
     all: 'Sve',
     forList: 'Za tvoju listu',
     usual: 'Što inače kupujemo',

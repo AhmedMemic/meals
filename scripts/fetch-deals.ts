@@ -1,4 +1,4 @@
-// Weekly sales check, run by the GitHub Action every Thursday morning:
+// Weekly sales check, run by the GitHub Action every Thursday at noon:
 // asks Claude for each store's current sales in CITY and writes public/deals.json.
 // Stores that fail keep last week's sales (the workflow downloads the live file first).
 import Anthropic from '@anthropic-ai/sdk';
